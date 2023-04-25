@@ -22,7 +22,8 @@ import com.ecom.blogApi.api.model.BlogCategory;
 import com.ecom.blogApi.service.BlogService;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping(path="/api/v1")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class BlogController {
 
 	@Autowired
@@ -73,6 +74,7 @@ public class BlogController {
 		}
 	}
 
+	@CrossOrigin
 	@PutMapping(value = "/blog/{blogId}")
 	ResponseEntity<Object> updateBlogAndImage(@PathVariable("blogId") int blogId,
 			@RequestParam("categoryId") int categoryId, @RequestParam("authorName") String authorName,
@@ -94,6 +96,7 @@ public class BlogController {
 
 	}
 
+	@CrossOrigin
 	@DeleteMapping(value = "/blog/{blogid}")
 	ResponseEntity<Object> deleteBlog(@PathVariable("blogid") int id) {
 		try {

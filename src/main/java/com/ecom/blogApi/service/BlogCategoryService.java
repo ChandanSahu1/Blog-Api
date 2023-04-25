@@ -46,7 +46,7 @@ public class BlogCategoryService {
 	private String bucketName = "files.nxgecom.in";
 	
 	
-	String envPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+//	String envPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
 
 	public BlogCategory createBlogCategory(String categoryName, String seoTitle, String seoMeta, String status,
 			MultipartFile imgData) throws Exception {
@@ -87,10 +87,10 @@ public class BlogCategoryService {
 			String imgDownloadUri = "https://" + bucketName + "/" + objectName;
 			System.out.println("imgDownloadUri  ========  " + imgDownloadUri);
 			
-			Credentials credentials = GoogleCredentials
-		  			  .fromStream(new FileInputStream(envPath));
+//			Credentials credentials = GoogleCredentials
+//		  			  .fromStream(new FileInputStream(envPath));
 
-			Storage storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+			Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
 			BlobId blobId = BlobId.of(bucketName, objectName);
 			BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
 			byte[] content = imgData.getBytes();
@@ -275,10 +275,10 @@ public class BlogCategoryService {
 				System.out.println("before update img name === " + blgCateImgData.getCategoryImageName());
 				blgCateImgData.setCategoryImageName(categoryImageName);
 				
-				Credentials credentials = GoogleCredentials
-			  			  .fromStream(new FileInputStream(envPath));
+//				Credentials credentials = GoogleCredentials
+//			  			  .fromStream(new FileInputStream(envPath));
 				
-				Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+				Storage strg = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
 				BlobId blbId = BlobId.of(bucketName, objectName);
 				BlobInfo info = BlobInfo.newBuilder(blbId).build();
 				byte[] imgdata = categoryImg.getBytes();

@@ -326,6 +326,64 @@ paths:
           description: Bad Gatway
           content: {}              
       x-codegen-request-body-name: body
+  /user:
+    post:
+      tags:
+        -  User Registration
+      summary: Adding a new user details
+      requestBody:
+        description: User details that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+        required: true
+      responses:
+        '201':
+          description: Successful
+          content: {}      
+        '400':
+          description: Bad request input
+          content: {}
+        '404':
+          description: Data not found
+          content: {}
+        '500':
+          description: Invalid input
+          content: {}          
+        '502':
+          description: Bad Gatway
+          content: {}               
+      x-codegen-request-body-name: body 
+  /userlogin:
+    post:
+      tags:
+        -  User Login
+      summary: User login
+      requestBody:
+        description: User details that needs to be added for login
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+        required: true
+      responses:
+        '201':
+          description: Successful
+          content: {}      
+        '400':
+          description: Bad request input
+          content: {}
+        '404':
+          description: Data not found
+          content: {}
+        '500':
+          description: Invalid input
+          content: {}          
+        '502':
+          description: Bad Gatway
+          content: {}               
+      x-codegen-request-body-name: body 
 components:
   schemas:
     BlogCategory:
@@ -414,3 +472,54 @@ components:
       $ref: '#/components/schemas/BlogImages'
     BlogMobileBanner:
       $ref: '#/components/schemas/BlogImages'
+    UserRegistration:
+      type: object
+      required:
+        - userId
+        - userName
+        - email
+        - mobile
+        - password
+      properties:
+        userId:
+          type: integer
+        userName:
+          type: string
+          maxLength: 120
+        email:
+          type: string
+          maxLength: 250
+        mobile:
+          type: string
+          maxLength: 12
+        password:
+          type: string
+          maxLength: 250
+    UserLogin:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          maxLength: 250
+        password:
+          type: string
+          maxLength: 250
+    UserLoginResponse:
+      type: object
+      properties:
+        userId:
+          type: integer
+        userName:
+          type: string
+        email:
+          type: string
+          maxLength: 250
+        mobile:
+          type: string
+          maxLength: 12
+        response:
+          type: boolean
+          

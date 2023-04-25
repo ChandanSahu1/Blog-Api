@@ -47,7 +47,7 @@ CREATE TABLE `blog_images` (
   `blog_id` int NOT NULL,
   `blog_image_name` varchar(120),
   `download_url` varchar(250) DEFAULT NULL,
-  `image_type` char(6) DEFAULT NULL,
+  `image_type` char(12) DEFAULT NULL,
   `created_by` int DEFAULT NULL,
   `modified_by` int DEFAULT NULL,
   `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -89,4 +89,17 @@ CREATE TABLE `blog_history` (
   PRIMARY KEY (`blog_history_id`),
   KEY `blog_id` (`blog_id`),
   CONSTRAINT `blog_history_ibfk_1` FOREIGN KEY (`blog_id`) REFERENCES `blogs` (`blog_id`)
+);
+
+create table user_registration (
+user_id int not null PRIMARY KEY AUTO_INCREMENT,
+user_name varchar(120) not null,
+email varchar(250) not null UNIQUE,
+mobile varchar(12) not null UNIQUE,
+password varchar(250) not null,
+status char(12) DEFAULT Null,
+created_by INT DEFAULT NULL,
+modified_by INT DEFAULT NULL,
+created_date timestamp NOT NULL DEFAULT  current_timestamp(),
+modified_date timestamp NULL DEFAULT NULL ON Update current_timestamp()
 );

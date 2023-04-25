@@ -45,7 +45,7 @@ public class BlogService {
 	private String projectId = "achievers-one";
 	private String bucketName = "files.nxgecom.in";
 	
-	String envPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+//	String envPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
 
 	public Blog createBlog(int categoryId, String authorName, String blogTitle, String description, String seoTitle,
 			String seoMetaDescription, String status, MultipartFile imgData, MultipartFile bannerData,
@@ -115,10 +115,10 @@ public class BlogService {
 			String imgDownloadUri = "https://" + bucketName + "/" + imgObjectName;
 			System.out.println("imgDownloadUri  ========  " + imgDownloadUri);
 			
-			Credentials credentials = GoogleCredentials
-		  			  .fromStream(new FileInputStream(envPath));
+//			Credentials credentials = GoogleCredentials
+//		  			  .fromStream(new FileInputStream(envPath));
 
-			Storage storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+			Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
 			BlobId blobId = BlobId.of(bucketName, imgObjectName);
 			BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
 			byte[] content = imgData.getBytes();
@@ -382,8 +382,8 @@ public class BlogService {
 		String bannerObjectName = "devecomm/" + bannerName;
 		String mobileBannerObjectName = "devecomm/" + mobileBannerName;
 		
-		Credentials credentials = GoogleCredentials
-	  			  .fromStream(new FileInputStream(envPath));
+//		Credentials credentials = GoogleCredentials
+//	  			  .fromStream(new FileInputStream(envPath));
 
 		blgDataOptional = blogRepository.findById(blogId);
 		if (blgDataOptional.isPresent()) {
@@ -402,7 +402,7 @@ public class BlogService {
 			for (BlogImageData blgImageData : blgImageDataList) {
 				if ("Image".equals(blgImageData.getImgType())) {
 					blgImageData.setBlogImageName(imageName);
-					Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+					Storage strg = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
 					BlobId blobId = BlobId.of(bucketName, imgObjectName);
 					BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
 					byte[] blogImage = imageData.getBytes();
@@ -415,7 +415,8 @@ public class BlogService {
 				if ("Banner".equals(blgImageData.getImgType())) {
 
 					blgImageData.setBlogImageName(bannerName);
-					Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+//					Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+					Storage strg = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
 					BlobId blobId = BlobId.of(bucketName, bannerObjectName);
 					BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
 					byte[] blogBanner = bannerData.getBytes();
@@ -427,7 +428,7 @@ public class BlogService {
 				}
 				if ("MobileBanner".equals(blgImageData.getImgType())) {
 					blgImageData.setBlogImageName(mobileBannerName);
-					Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+					Storage strg = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
 					BlobId blobId = BlobId.of(bucketName, mobileBannerObjectName);
 					BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
 					byte[] blogMobileBanner = mobileBanner.getBytes();

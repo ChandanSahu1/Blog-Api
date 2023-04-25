@@ -22,13 +22,14 @@ import com.ecom.blogApi.api.model.BlogCategory;
 import com.ecom.blogApi.service.BlogCategoryService;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping(path="/api/v1")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class BlogCategoryController {
 
 	@Autowired
 	BlogCategoryService blogCategoryService;
-
+	
+	@CrossOrigin
 	@PostMapping(value = "/blogcategory")
 	ResponseEntity<Object> postBlogCategory(@RequestParam("categoryName") String categoryName,
 			@RequestParam("seoTitle") String seoTitle, @RequestParam("status") String status,
@@ -60,7 +61,8 @@ public class BlogCategoryController {
 		}
 
 	}
-
+	
+	@CrossOrigin
 	@GetMapping(value = "/blogcategory/{blogcategoryId}")
 	ResponseEntity<Object> getBlogCategorybyId(@PathVariable int blogcategoryId) {
 		try {
@@ -73,20 +75,8 @@ public class BlogCategoryController {
 		}
 
 	}
-
-//	@PutMapping(value = "/updateblogcategory/{blogcategoryid}", consumes = "application/json", produces = "application/json")
-//	ResponseEntity<Object> putBlogCategory(@PathVariable("blogcategoryid") int id,
-//			@RequestBody BlogCategory blogCategoryBody) {
-//		BlogCategory blogCategory = null;
-//		try {
-//
-//			blogCategory = blogCategoryService.updateBlogCategory(id, blogCategoryBody);
-//			return ResponseHandler.generateResponseBlogCategory("Data is Updated ", HttpStatus.OK, blogCategory);
-//		} catch (Exception ex) {
-//			return ResponseHandler.generateResponseBlogCategory(ex.getMessage(), HttpStatus.MULTI_STATUS, null);
-//		}
-//	}
-
+	
+	@CrossOrigin
 	@PutMapping(value = "/blogcategory/{blogcategoryid}")
 	ResponseEntity<Object> putBlogCategoryImage(@PathVariable("blogcategoryid") int id,
 			@RequestParam("categoryName") String categoryName, @RequestParam("seoTitle") String seoTitle,
@@ -104,7 +94,8 @@ public class BlogCategoryController {
 			return ResponseHandler.generateResponseBlogCategory(ex.getMessage(), HttpStatus.MULTI_STATUS, null);
 		}
 	}
-
+	
+	@CrossOrigin
 	@DeleteMapping(value = "/blogcategory/{blogcategoryid}")
 	ResponseEntity<Object> deleteBlogCategory(@PathVariable("blogcategoryid") int id) {
 

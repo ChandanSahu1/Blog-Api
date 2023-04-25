@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import com.ecom.blogApi.api.model.Blog;
 import com.ecom.blogApi.api.model.BlogCategory;
 import com.ecom.blogApi.api.model.BlogCategoryImage;
+import com.ecom.blogApi.api.model.UserLoginResponse;
+import com.ecom.blogApi.api.model.UserRegistration;
 
 public class ResponseHandler {
 
@@ -64,6 +66,43 @@ public class ResponseHandler {
 			return new ResponseEntity<Object>(map, status);
 		}
 
+	}
+	
+	public static ResponseEntity<Object> generateResponseForUserRegistration(String message, HttpStatus status,
+			Object responseObj) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		if (responseObj != null && (responseObj instanceof UserRegistration)) {
+			map.put("message", message);
+			map.put("status", status.value());
+			map.put("userId", ((UserRegistration) responseObj).getUserId());
+			return new ResponseEntity<Object>(map, status);
+		} else {
+			map.put("message", message);
+			map.put("status", status.value());
+			map.put("userId", null);
+			return new ResponseEntity<Object>(map, status);
+		}
+
+	}
+	
+	public static ResponseEntity<Object> generateResponseForLogin(String message, Object responseObj) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		if (responseObj != null && (responseObj instanceof UserLoginResponse)) {
+			map.put("message", message);
+			map.put("userId", ((UserLoginResponse) responseObj).getUserId());
+			map.put("name", ((UserLoginResponse) responseObj).getUserName());
+			map.put("mobile", ((UserLoginResponse) responseObj).getMobile());
+			map.put("email", ((UserLoginResponse) responseObj).getEmail());
+			map.put("response", ((UserLoginResponse) responseObj).getResponse());
+			return new ResponseEntity<Object>(map,HttpStatus.OK);
+		}else {
+			map.put("error", message);
+			map.put("response", false);
+			return new ResponseEntity<Object>(map, HttpStatus.OK);
+		}
+		
 	}
 
 }
