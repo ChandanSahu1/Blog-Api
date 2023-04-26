@@ -58,12 +58,7 @@
 			<version>5.2.4.Final</version>
 		</dependency>
 		<!--  Swagger UI  -->
-		<!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-ui 
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.7.0</version>
-		</dependency> -->
+		
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -104,6 +99,17 @@
 			<artifactId>java-uuid-generator</artifactId>
 			<version>4.1.0</version>
 		</dependency>
+		
+		 <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency> 
+        
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency> 
 
 	</dependencies>
 	<build>

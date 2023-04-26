@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,10 +43,14 @@ public class BlogCategoryService {
 	@Autowired
 	BlogCategoryImageRepository blogCategoryImageRepository;
 
-	private String projectId = "achievers-one";
-	private String bucketName = "files.nxgecom.in";
-	
-	
+//	private String projectId = "achievers-one";
+//	private String bucketName = "files.nxgecom.in";
+
+	@Value("${gcp.config.project.id}")
+	private String projectId;
+	@Value("${gcp.config.file}")
+	private String bucketName;
+
 	String envPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
 
 	public BlogCategory createBlogCategory(String categoryName, String seoTitle, String seoMeta, String status,
@@ -71,7 +76,7 @@ public class BlogCategoryService {
 		String name = categoryName.replace(" ", "_");
 		imageName = name + "_Category" + generatedNo + imgExtention;
 		System.out.println("image name ====== " + imageName);
-		String objectName = "devecomm/" + imageName;
+		String objectName = "nxgdemo/" + imageName;
 
 		try {
 
@@ -86,9 +91,8 @@ public class BlogCategoryService {
 			categoryImage.setCategoryImageName(imageName);
 			String imgDownloadUri = "https://" + bucketName + "/" + objectName;
 			System.out.println("imgDownloadUri  ========  " + imgDownloadUri);
-			
-			Credentials credentials = GoogleCredentials
-		  			  .fromStream(new FileInputStream(envPath));
+
+			Credentials credentials = GoogleCredentials.fromStream(new FileInputStream(envPath));
 
 			Storage storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
 			BlobId blobId = BlobId.of(bucketName, objectName);
@@ -207,57 +211,70 @@ public class BlogCategoryService {
 
 		BlogCategory blgCate;
 
-		String categoryImageName = "";
-		StringBuffer imgExtention = new StringBuffer(".");
+		if (categoryImg.isEmpty()) {
 
-		try {
-			String contentType = categoryImg.getContentType();
-			imgExtention.append(contentType.substring(contentType.lastIndexOf("/") + 1));
-		} catch (Exception ex) {
-		}
+			blogCategoryDataOptional = blogCategoryRepository.findById(id);
+			if (blogCategoryDataOptional.isPresent()) {
 
-		// Generate Random Number
-		Random random = new Random();
-		int generatedNo = random.nextInt(100000, 999999);
-		System.out.println("generatedNo == " + generatedNo);
+				blogCategoryData = blogCategoryDataOptional.get();
 
-		String name = categoryName.replace(" ", "_");
-		categoryImageName = name + "_Category" + generatedNo + imgExtention;
-		System.out.println("image name ====== " + categoryImageName);
-		String objectName = "devecomm/" + categoryImageName;
-
-		blogCategoryDataOptional = blogCategoryRepository.findById(id);
-		if (blogCategoryDataOptional.isPresent()) {
-
-			blogCategoryData = blogCategoryDataOptional.get();
-
-			blogCategoryData.setCategoryName(categoryName);
-			blogCategoryData.setSeoMetaDesc(seoMeta);
-			blogCategoryData.setSeoTitle(seoTitle);
-			blogCategoryData.setStatus(status);
-
-//			BlogCategoryImage blgCategoryImage = blogCate.getCategoryImage();
-			List<BlogCategoryImageData> blgCategoryImgData = blogCategoryData.getBlogCategoryImageData();
-			for (BlogCategoryImageData blgCateImgData : blgCategoryImgData) {
-
-				System.out.println("before update img name === " + blgCateImgData.getCategoryImageName());
-				blgCateImgData.setCategoryImageName(categoryImageName);
-				
-				Credentials credentials = GoogleCredentials
-			  			  .fromStream(new FileInputStream(envPath));
-				
-				Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
-				BlobId blbId = BlobId.of(bucketName, objectName);
-				BlobInfo info = BlobInfo.newBuilder(blbId).build();
-				byte[] imgdata = categoryImg.getBytes();
-				strg.createFrom(info, new ByteArrayInputStream(imgdata));
-
-				String imgDownloadUri = "https://" + bucketName + "/" + objectName;
-				blgCateImgData.setCategoryImageUrl(imgDownloadUri);
+				blogCategoryData.setCategoryName(categoryName);
+				blogCategoryData.setSeoMetaDesc(seoMeta);
+				blogCategoryData.setSeoTitle(seoTitle);
+				blogCategoryData.setStatus(status);
 			}
-		}
 
-		blogCategoryRepository.save(blogCategoryData);
+		} else {
+			String categoryImageName = "";
+			StringBuffer imgExtention = new StringBuffer(".");
+
+			try {
+				String contentType = categoryImg.getContentType();
+				imgExtention.append(contentType.substring(contentType.lastIndexOf("/") + 1));
+			} catch (Exception ex) {
+			}
+
+			// Generate Random Number
+			Random random = new Random();
+			int generatedNo = random.nextInt(100000, 999999);
+			System.out.println("generatedNo == " + generatedNo);
+
+			String name = categoryName.replace(" ", "_");
+			categoryImageName = name + "_Category" + generatedNo + imgExtention;
+			System.out.println("image name ====== " + categoryImageName);
+			String objectName = "nxgdemo/" + categoryImageName;
+
+			blogCategoryDataOptional = blogCategoryRepository.findById(id);
+			if (blogCategoryDataOptional.isPresent()) {
+
+				blogCategoryData = blogCategoryDataOptional.get();
+
+				blogCategoryData.setCategoryName(categoryName);
+				blogCategoryData.setSeoMetaDesc(seoMeta);
+				blogCategoryData.setSeoTitle(seoTitle);
+				blogCategoryData.setStatus(status);
+
+				List<BlogCategoryImageData> blgCategoryImgData = blogCategoryData.getBlogCategoryImageData();
+				for (BlogCategoryImageData blgCateImgData : blgCategoryImgData) {
+
+					System.out.println("before update img name === " + blgCateImgData.getCategoryImageName());
+					blgCateImgData.setCategoryImageName(categoryImageName);
+
+					Credentials credentials = GoogleCredentials.fromStream(new FileInputStream(envPath));
+
+					Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+					BlobId blbId = BlobId.of(bucketName, objectName);
+					BlobInfo info = BlobInfo.newBuilder(blbId).build();
+					byte[] imgdata = categoryImg.getBytes();
+					strg.createFrom(info, new ByteArrayInputStream(imgdata));
+
+					String imgDownloadUri = "https://" + bucketName + "/" + objectName;
+					blgCateImgData.setCategoryImageUrl(imgDownloadUri);
+				}
+			}
+
+			blogCategoryRepository.save(blogCategoryData);
+		}
 
 		blgCate = new BlogCategory();
 		blgCate.setBlogcategoryId(blogCategoryData.getBlogCategoryId());
@@ -282,7 +299,7 @@ public class BlogCategoryService {
 
 	}
 
-	public BlogCategory deleteBlogCategory(int blogcategoryId) {
+	public BlogCategory deleteBlogCategory(int blogcategoryId) throws Exception {
 
 		BlogCategory blgCategory;
 		blogCategoryDataOptional = blogCategoryRepository.findById(blogcategoryId);
@@ -293,6 +310,8 @@ public class BlogCategoryService {
 
 			blogCategoryData.setStatus("Inactive");
 
+		} else {
+			throw new Exception("Data Not Found...!");
 		}
 
 		blogCategoryRepository.save(blogCategoryData);

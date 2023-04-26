@@ -79,7 +79,7 @@ public class BlogController {
 	ResponseEntity<Object> updateBlogAndImage(@PathVariable("blogId") int blogId,
 			@RequestParam("categoryId") int categoryId, @RequestParam("authorName") String authorName,
 			@RequestParam("blogTitle") String blogTitle, @RequestParam("description") String description,
-			@RequestParam("seoTitle") String seoTitle, @RequestParam("seoMetaDesc") String seoMetaDescription,
+			@RequestParam("seoTitle") String seoTitle, @RequestParam("seoMetaDescription") String seoMetaDescription,
 			@RequestParam("status") String status, @RequestParam("blogImage") MultipartFile imageData,
 			@RequestParam("blogBanner") MultipartFile bannerData,
 			@RequestParam("mobileBanner") MultipartFile mobileBanner) {
