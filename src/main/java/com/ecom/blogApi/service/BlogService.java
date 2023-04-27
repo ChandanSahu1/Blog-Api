@@ -19,6 +19,7 @@ import com.ecom.blogApi.datamodel.BlogData;
 import com.ecom.blogApi.datamodel.BlogImageData;
 import com.ecom.blogApi.repository.BlogImageRepository;
 import com.ecom.blogApi.repository.BlogRepository;
+import com.ecom.blogApi.util.UploadFileInGCS;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.BlobId;
@@ -42,17 +43,17 @@ public class BlogService {
 
 	@Autowired
 	BlogImageRepository blogImgRepository;
+	
+	String envPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
 
 	@Value("${gcp.config.project.id}")
 	private String projectId;
-	
+
 	@Value("${gcp.config.file}")
 	private String bucketName;
-	
+
 	@Value("${gcp.config.directory}")
 	private String directory;
-
-	String envPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
 
 	public Blog createBlog(int categoryId, String authorName, String blogTitle, String description, String seoTitle,
 			String seoMetaDescription, String status, MultipartFile imgData, MultipartFile bannerData,
@@ -60,51 +61,6 @@ public class BlogService {
 		blogData = new BlogData();
 
 		Blog blog;
-
-		String imageName = "";
-		String bannerName = "";
-		String mobileBannerName = "";
-
-		StringBuffer imgExtention = new StringBuffer(".");
-		StringBuffer bannerExtention = new StringBuffer(".");
-		StringBuffer mobileBannerExtention = new StringBuffer(".");
-
-		try {
-
-			String imageContentType = imgData.getContentType();
-			imgExtention.append(imageContentType.substring(imageContentType.lastIndexOf("/") + 1));
-
-			String bannerContentType = bannerData.getContentType();
-			bannerExtention.append(bannerContentType.substring(bannerContentType.lastIndexOf("/") + 1));
-
-			String mobileBannerContentType = mobileBanner.getContentType();
-			mobileBannerExtention
-					.append(mobileBannerContentType.substring(mobileBannerContentType.lastIndexOf("/") + 1));
-
-		} catch (Exception ex) {
-		}
-		// Generate Random Number
-		Random random = new Random();
-		int number1 = random.nextInt(100000, 999999);
-		System.out.println("number1 == " + number1);
-
-		Random random1 = new Random();
-		int number2 = random1.nextInt(100000, 999999);
-		System.out.println("number2 == " + number2);
-
-		Random random2 = new Random();
-		int number3 = random2.nextInt(100000, 999999);
-		System.out.println("number3 == " + number3);
-
-		String name = blogTitle.replace(" ", "_");
-		imageName = name + "_blog_image" + number1 + imgExtention;
-		bannerName = name + "_blog_banner" + number2 + bannerExtention;
-		mobileBannerName = name + "_blog_mobile_banner" + number3 + mobileBannerExtention;
-		System.out.println("image name ====== " + imageName);
-
-		String imgObjectName = directory + "/" + imageName;
-		String bannerObjectName = directory + "/" + bannerName;
-		String mobileBannerObjectName = directory + "/" + mobileBannerName;
 
 		try {
 			blogData.setBlogCategoryId(categoryId);
@@ -115,21 +71,52 @@ public class BlogService {
 			blogData.setSeoMetaDescription(seoMetaDescription);
 			blogData.setStatus(status);
 
+			StringBuffer imgExtention = new StringBuffer(".");
+			StringBuffer bannerExtention = new StringBuffer(".");
+			StringBuffer mobileBannerExtention = new StringBuffer(".");
+
+			try {
+
+				String imageContentType = imgData.getContentType();
+				imgExtention.append(imageContentType.substring(imageContentType.lastIndexOf("/") + 1));
+
+				String bannerContentType = bannerData.getContentType();
+				bannerExtention.append(bannerContentType.substring(bannerContentType.lastIndexOf("/") + 1));
+
+				String mobileBannerContentType = mobileBanner.getContentType();
+				mobileBannerExtention
+						.append(mobileBannerContentType.substring(mobileBannerContentType.lastIndexOf("/") + 1));
+
+			} catch (Exception ex) {
+			}
+			// Generate Random Number
+			Random random = new Random();
+			int number1 = random.nextInt(100000, 999999);
+
+			Random random1 = new Random();
+			int number2 = random1.nextInt(100000, 999999);
+
+			Random random2 = new Random();
+			int number3 = random2.nextInt(100000, 999999);
+
+			String name = blogTitle.replace(" ", "_");
+			String imageName = name + "_blog_image" + number1 + imgExtention;
+			String bannerName = name + "_blog_banner" + number2 + bannerExtention;
+			String mobileBannerName = name + "_blog_mobile_banner" + number3 + mobileBannerExtention;
+			System.out.println("image name ====== " + imageName);
+
+			String imgObjectName = directory + "/" + imageName;
+			String bannerObjectName = directory + "/" + bannerName;
+			String mobileBannerObjectName = directory + "/" + mobileBannerName;
+
 			List<BlogImageData> blogImageDataList = new ArrayList<BlogImageData>();
 
 			BlogImageData blogImageData = new BlogImageData();
 			blogImageData.setBlogImageName(imageName);
+
+			uploadFile(imgObjectName, imgData);
+
 			String imgDownloadUri = "https://" + bucketName + "/" + imgObjectName;
-			System.out.println("imgDownloadUri  ========  " + imgDownloadUri);
-
-//			Credentials credentials = GoogleCredentials.fromStream(new FileInputStream(envPath));
-
-			Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-			BlobId blobId = BlobId.of(bucketName, imgObjectName);
-			BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-			byte[] content = imgData.getBytes();
-			storage.createFrom(blobInfo, new ByteArrayInputStream(content));
-
 			blogImageData.setImageDownloadUrl(imgDownloadUri);
 			blogImageData.setImgType("Image");
 
@@ -137,14 +124,9 @@ public class BlogService {
 			BlogImageData blogBannerData = new BlogImageData();
 			blogBannerData.setBlogImageName(bannerName);
 
+			uploadFile(bannerObjectName, bannerData);
+
 			String bannerDownloadUri = "https://" + bucketName + "/" + bannerObjectName;
-			System.out.println("bannerDownloadUri  ========  " + bannerDownloadUri);
-
-			BlobId blobId2 = BlobId.of(bucketName, bannerObjectName);
-			BlobInfo blobInfo2 = BlobInfo.newBuilder(blobId2).build();
-			byte[] content2 = bannerData.getBytes();
-			storage.createFrom(blobInfo2, new ByteArrayInputStream(content2));
-
 			blogBannerData.setImageDownloadUrl(bannerDownloadUri);
 			blogBannerData.setImgType("Banner");
 
@@ -152,14 +134,9 @@ public class BlogService {
 			BlogImageData blogMobileBannerData = new BlogImageData();
 			blogMobileBannerData.setBlogImageName(mobileBannerName);
 
+			uploadFile(mobileBannerObjectName, mobileBanner);
+
 			String mobileBannerDownloadUri = "https://" + bucketName + "/" + mobileBannerObjectName;
-			System.out.println("mobileBannerDownloadUri  ========  " + mobileBannerDownloadUri);
-
-			BlobId bldId = BlobId.of(bucketName, mobileBannerObjectName);
-			BlobInfo blbInfo = BlobInfo.newBuilder(bldId).build();
-			byte[] content3 = mobileBanner.getBytes();
-			storage.createFrom(blbInfo, new ByteArrayInputStream(content3));
-
 			blogMobileBannerData.setImageDownloadUrl(mobileBannerDownloadUri);
 			blogMobileBannerData.setImgType("MobileBanner");
 
@@ -177,7 +154,6 @@ public class BlogService {
 
 			blog = new Blog();
 			blog.setBlogId(blogData.getBlogId());
-//			blogResponse.setBlogId(blogData.getBlogId());
 			blog.setBlogCategoryId(blogData.getBlogCategoryId());
 			System.out.println("author name == " + blogData.getAuthorName());
 			blog.setAuthorName(blogData.getAuthorName());
@@ -321,13 +297,6 @@ public class BlogService {
 					mobileBanner.setImageDownloadUrl(blgImageData.getImageDownloadUrl());
 					mobileBanner.setImageType(blgImageData.getImgType());
 				}
-//				else {
-//
-//					subImage.setBlogImageId(null);
-//					subImage.setBlogImageName(null);
-//					subImage.setImageDownloadUrl(null);
-//					subImage.setImageType(null);
-//				}
 			}
 			blogResponse.setBlogSubImage(subImage);
 			blogResponse.setBlogBanner(bannerImage);
@@ -339,268 +308,134 @@ public class BlogService {
 		}
 	}
 
-	public Blog updateBlog(int blogId, int categoryId, String authorName, String blogTitle, String description,
+	public Blog update(int blogId, int categoryId, String authorName, String blogTitle, String description,
 			String seoTitle, String seoMetaDescription, String status, MultipartFile imageData,
-			MultipartFile bannerData, MultipartFile mobileBanner) throws IOException {
+			MultipartFile bannerData, MultipartFile mobileBanner) throws Exception {
+
 		Blog blogRes;
 
-		if (imageData.isEmpty() && bannerData.isEmpty() && mobileBanner.isEmpty()) {
+		blgDataOptional = blogRepository.findById(blogId);
+		if (blgDataOptional.isPresent()) {
 
-			blgDataOptional = blogRepository.findById(blogId);
-			if (blgDataOptional.isPresent()) {
+			blogData = blgDataOptional.get();
 
-				blogData = blgDataOptional.get();
+			blogData.setBlogCategoryId(categoryId);
+			blogData.setAuthorName(authorName);
+			blogData.setBlogTitle(blogTitle);
+			blogData.setDescription(description);
+			blogData.setSeoTitle(seoTitle);
+			blogData.setSeoMetaDescription(seoMetaDescription);
+			blogData.setStatus(status);
 
-				blogData.setBlogCategoryId(categoryId);
-				blogData.setAuthorName(authorName);
-				blogData.setBlogTitle(blogTitle);
-				blogData.setDescription(description);
-				blogData.setSeoTitle(seoTitle);
-				blogData.setSeoMetaDescription(seoMetaDescription);
-				blogData.setStatus(status);
-			}
+			if (imageData != null && !imageData.isEmpty()) {
+				String imageName = "";
+				StringBuffer imgExtention = new StringBuffer(".");
 
-		}
-		if (!imageData.isEmpty() && !bannerData.isEmpty() && mobileBanner.isEmpty()) {
-			String imageName = "";
-			String bannerName = "";
+				try {
 
-			StringBuffer imgExtention = new StringBuffer(".");
-			StringBuffer bannerExtention = new StringBuffer(".");
+					String imageContentType = imageData.getContentType();
+					imgExtention.append(imageContentType.substring(imageContentType.lastIndexOf("/") + 1));
 
-			try {
+				} catch (Exception ex) {
+				}
+				// Generate Random Number
+				Random random = new Random();
+				int number1 = random.nextInt(100000, 999999);
 
-				String imageContentType = imageData.getContentType();
-				imgExtention.append(imageContentType.substring(imageContentType.lastIndexOf("/") + 1));
+				String name = blogTitle.replace(" ", "_");
+				imageName = name + "_blog_image" + number1 + imgExtention;
 
-				String bannerContentType = bannerData.getContentType();
-				bannerExtention.append(bannerContentType.substring(bannerContentType.lastIndexOf("/") + 1));
-
-			} catch (Exception ex) {
-			}
-			// Generate Random Number
-			Random random = new Random();
-			int number1 = random.nextInt(100000, 999999);
-
-			Random random1 = new Random();
-			int number2 = random1.nextInt(100000, 999999);
-
-			String name = blogTitle.replace(" ", "_");
-			imageName = name + "_blog_image" + number1 + imgExtention;
-			bannerName = name + "_blog_banner" + number2 + bannerExtention;
-
-			String imgObjectName = directory + "/" + imageName;
-			String bannerObjectName = directory + "/" + bannerName;
-			Credentials credentials = GoogleCredentials.fromStream(new FileInputStream(envPath));
-
-			blgDataOptional = blogRepository.findById(blogId);
-			if (blgDataOptional.isPresent()) {
-
-				blogData = blgDataOptional.get();
-
-				blogData.setBlogCategoryId(categoryId);
-				blogData.setAuthorName(authorName);
-				blogData.setBlogTitle(blogTitle);
-				blogData.setDescription(description);
-				blogData.setSeoTitle(seoTitle);
-				blogData.setSeoMetaDescription(seoMetaDescription);
-				blogData.setStatus(status);
+				String imgObjectName = directory + "/" + imageName;
 
 				List<BlogImageData> blgImageDataList = blogData.getBlogImageData();
 				for (BlogImageData blgImageData : blgImageDataList) {
 					if ("Image".equals(blgImageData.getImgType())) {
 						blgImageData.setBlogImageName(imageName);
-						Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
-						BlobId blobId = BlobId.of(bucketName, imgObjectName);
-						BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-						byte[] blogImage = imageData.getBytes();
-						strg.createFrom(blobInfo, new ByteArrayInputStream(blogImage));
+
+						uploadFile(imgObjectName, imageData);
 
 						String imageDownloadUrl = "https://" + bucketName + "/" + imgObjectName;
 						blgImageData.setImageDownloadUrl(imageDownloadUrl);
 
 					}
+				}
+
+				blogData.setBlogImageData(blgImageDataList);
+			}
+
+			if (bannerData != null && !bannerData.isEmpty()) {
+				String bannerName = "";
+
+				StringBuffer bannerExtention = new StringBuffer(".");
+
+				try {
+
+					String bannerContentType = bannerData.getContentType();
+					bannerExtention.append(bannerContentType.substring(bannerContentType.lastIndexOf("/") + 1));
+
+				} catch (Exception ex) {
+				}
+				// Generate Random Number
+				Random random = new Random();
+				int num = random.nextInt(100000, 999999);
+
+				String name = blogTitle.replace(" ", "_");
+				bannerName = name + "_blog_banner" + num + bannerExtention;
+
+				String bannerObjectName = directory + "/" + bannerName;
+
+				List<BlogImageData> blgImageDataList1 = blogData.getBlogImageData();
+				for (BlogImageData blgImageData : blgImageDataList1) {
 					if ("Banner".equals(blgImageData.getImgType())) {
-
 						blgImageData.setBlogImageName(bannerName);
-						Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
-//						Storage strg = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-						BlobId blobId = BlobId.of(bucketName, bannerObjectName);
-						BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-						byte[] blogBanner = bannerData.getBytes();
-						strg.createFrom(blobInfo, new ByteArrayInputStream(blogBanner));
+						uploadFile(bannerObjectName, bannerData);
 
-						String bannerDownloadUrl = "https://" + bucketName + "/" + bannerObjectName;
-						blgImageData.setImageDownloadUrl(bannerDownloadUrl);
-
-					}
-				}
-
-				blogData.setBlogImageData(blgImageDataList);
-
-			}
-			blogRepository.save(blogData);
-		}
-		if (imageData.isEmpty() && bannerData.isEmpty() && !mobileBanner.isEmpty()) {
-
-			String mobileBannerName = "";
-			StringBuffer mobileBannerExtention = new StringBuffer(".");
-
-			try {
-
-				String mobileBannerContentType = mobileBanner.getContentType();
-				mobileBannerExtention
-						.append(mobileBannerContentType.substring(mobileBannerContentType.lastIndexOf("/") + 1));
-
-			} catch (Exception ex) {
-			}
-			// Generate Random Number
-			Random random = new Random();
-			int number = random.nextInt(100000, 999999);
-
-			String name = blogTitle.replace(" ", "_");
-			mobileBannerName = name + "_blog_mobile_banner" + number + mobileBannerExtention;
-			String mobileBannerObjectName = directory + "/" + mobileBannerName;
-
-			Credentials credentials = GoogleCredentials.fromStream(new FileInputStream(envPath));
-
-			blgDataOptional = blogRepository.findById(blogId);
-			if (blgDataOptional.isPresent()) {
-
-				blogData = blgDataOptional.get();
-
-				blogData.setBlogCategoryId(categoryId);
-				blogData.setAuthorName(authorName);
-				blogData.setBlogTitle(blogTitle);
-				blogData.setDescription(description);
-				blogData.setSeoTitle(seoTitle);
-				blogData.setSeoMetaDescription(seoMetaDescription);
-				blogData.setStatus(status);
-
-				List<BlogImageData> blgImageDataList = blogData.getBlogImageData();
-				for (BlogImageData blgImageData : blgImageDataList) {
-					if ("MobileBanner".equals(blgImageData.getImgType())) {
-						blgImageData.setBlogImageName(mobileBannerName);
-						Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
-						BlobId blobId = BlobId.of(bucketName, mobileBannerObjectName);
-						BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-						byte[] blogMobileBanner = mobileBanner.getBytes();
-						strg.createFrom(blobInfo, new ByteArrayInputStream(blogMobileBanner));
-
-						String mobileBannerDownloadUrl = "https://" + bucketName + "/" + mobileBannerObjectName;
-						blgImageData.setImageDownloadUrl(mobileBannerDownloadUrl);
-
-					}
-				}
-
-				blogData.setBlogImageData(blgImageDataList);
-
-			}
-			blogRepository.save(blogData);
-		}
-		if (!imageData.isEmpty() && !bannerData.isEmpty() && !mobileBanner.isEmpty()) {
-			String imageName = "";
-			String bannerName = "";
-			String mobileBannerName = "";
-
-			StringBuffer imgExtention = new StringBuffer(".");
-			StringBuffer bannerExtention = new StringBuffer(".");
-			StringBuffer mobileBannerExtention = new StringBuffer(".");
-
-			try {
-
-				String imageContentType = imageData.getContentType();
-				imgExtention.append(imageContentType.substring(imageContentType.lastIndexOf("/") + 1));
-
-				String bannerContentType = bannerData.getContentType();
-				bannerExtention.append(bannerContentType.substring(bannerContentType.lastIndexOf("/") + 1));
-
-				String mobileBannerContentType = mobileBanner.getContentType();
-				mobileBannerExtention
-						.append(mobileBannerContentType.substring(mobileBannerContentType.lastIndexOf("/") + 1));
-
-			} catch (Exception ex) {
-			}
-			// Generate Random Number
-			Random random = new Random();
-			int number1 = random.nextInt(100000, 999999);
-
-			Random random1 = new Random();
-			int number2 = random1.nextInt(100000, 999999);
-
-			Random random2 = new Random();
-			int number3 = random2.nextInt(100000, 999999);
-
-			String name = blogTitle.replace(" ", "_");
-			imageName = name + "_blog_image" + number1 + imgExtention;
-			bannerName = name + "_blog_banner" + number2 + bannerExtention;
-			mobileBannerName = name + "_blog_mobile_banner" + number3 + mobileBannerExtention;
-
-			String imgObjectName = "nxgdemo/" + imageName;
-			String bannerObjectName = "nxgdemo/" + bannerName;
-			String mobileBannerObjectName = "nxgdemo/" + mobileBannerName;
-
-			Credentials credentials = GoogleCredentials.fromStream(new FileInputStream(envPath));
-
-			blgDataOptional = blogRepository.findById(blogId);
-			if (blgDataOptional.isPresent()) {
-
-				blogData = blgDataOptional.get();
-
-				blogData.setBlogCategoryId(categoryId);
-				blogData.setAuthorName(authorName);
-				blogData.setBlogTitle(blogTitle);
-				blogData.setDescription(description);
-				blogData.setSeoTitle(seoTitle);
-				blogData.setSeoMetaDescription(seoMetaDescription);
-				blogData.setStatus(status);
-
-				List<BlogImageData> blgImageDataList = blogData.getBlogImageData();
-				for (BlogImageData blgImageData : blgImageDataList) {
-					if ("Image".equals(blgImageData.getImgType())) {
-						blgImageData.setBlogImageName(imageName);
-						Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
-						BlobId blobId = BlobId.of(bucketName, imgObjectName);
-						BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-						byte[] blogImage = imageData.getBytes();
-						strg.createFrom(blobInfo, new ByteArrayInputStream(blogImage));
-
-						String imageDownloadUrl = "https://" + bucketName + "/" + imgObjectName;
+						String imageDownloadUrl = "https://" + bucketName + "/" + bannerObjectName;
 						blgImageData.setImageDownloadUrl(imageDownloadUrl);
 
 					}
-					if ("Banner".equals(blgImageData.getImgType())) {
+				}
 
-						blgImageData.setBlogImageName(bannerName);
-						Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
-//						Storage strg = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-						BlobId blobId = BlobId.of(bucketName, bannerObjectName);
-						BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-						byte[] blogBanner = bannerData.getBytes();
-						strg.createFrom(blobInfo, new ByteArrayInputStream(blogBanner));
+				blogData.setBlogImageData(blgImageDataList1);
+			}
+			if (mobileBanner != null && !mobileBanner.isEmpty()) {
+				String mobileBannerName = "";
 
-						String bannerDownloadUrl = "https://" + bucketName + "/" + bannerObjectName;
-						blgImageData.setImageDownloadUrl(bannerDownloadUrl);
+				StringBuffer mobileBannerExtention = new StringBuffer(".");
 
-					}
+				try {
+
+					String mobileBannerContentType = mobileBanner.getContentType();
+					mobileBannerExtention
+							.append(mobileBannerContentType.substring(mobileBannerContentType.lastIndexOf("/") + 1));
+
+				} catch (Exception ex) {
+				}
+				// Generate Random Number
+				Random random = new Random();
+				int num2 = random.nextInt(100000, 999999);
+
+				String name = blogTitle.replace(" ", "_");
+				mobileBannerName = name + "_blog_mobile_banner" + num2 + mobileBannerExtention;
+
+				String mobileBannerObjectName = directory + "/" + mobileBannerName;
+
+				List<BlogImageData> blgImageDataList1 = blogData.getBlogImageData();
+				for (BlogImageData blgImageData : blgImageDataList1) {
 					if ("MobileBanner".equals(blgImageData.getImgType())) {
 						blgImageData.setBlogImageName(mobileBannerName);
-						Storage strg = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
-						BlobId blobId = BlobId.of(bucketName, mobileBannerObjectName);
-						BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-						byte[] blogMobileBanner = mobileBanner.getBytes();
-						strg.createFrom(blobInfo, new ByteArrayInputStream(blogMobileBanner));
+						uploadFile(mobileBannerObjectName, mobileBanner);
 
-						String mobileBannerDownloadUrl = "https://" + bucketName + "/" + mobileBannerObjectName;
-						blgImageData.setImageDownloadUrl(mobileBannerDownloadUrl);
+						String imageDownloadUrl = "https://" + bucketName + "/" + mobileBannerObjectName;
+						blgImageData.setImageDownloadUrl(imageDownloadUrl);
 
 					}
 				}
 
-				blogData.setBlogImageData(blgImageDataList);
-
+				blogData.setBlogImageData(blgImageDataList1);
 			}
 			blogRepository.save(blogData);
+
 		}
 
 		blogRes = new Blog();
@@ -645,6 +480,22 @@ public class BlogService {
 		blogRes.setBlogMobileBanner(mobileBannerResponse);
 
 		return blogRes;
+	}
+
+	public void uploadFile(String object, MultipartFile data) throws Exception {
+
+		try {
+			Credentials credentials = GoogleCredentials.fromStream(new FileInputStream(envPath));
+			Storage storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+			BlobId blobId = BlobId.of(bucketName, object);
+			BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+			byte[] byteData = data.getBytes();
+			storage.createFrom(blobInfo, new ByteArrayInputStream(byteData));
+
+		} catch (Exception ex) {
+			throw new Exception("Image Not Uploaded...!");
+		}
+
 	}
 
 	public Blog deleteBlog(int blogId) {

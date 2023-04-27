@@ -12,7 +12,7 @@ import javax.validation.constraints.*;
 /**
  * BlogCategoryImage
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2023-04-26T18:03:08.023083400+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2023-04-27T18:22:59.519951200+05:30[Asia/Calcutta]")
 
 public class BlogCategoryImage   {
   @JsonProperty("blogCategoryImageId")
@@ -56,7 +56,7 @@ public class BlogCategoryImage   {
   @ApiModelProperty(required = true, value = "")
   @NotNull
 
-
+@Size(max=250) 
   public String getCategoryImageName() {
     return categoryImageName;
   }
@@ -77,7 +77,7 @@ public class BlogCategoryImage   {
   @ApiModelProperty(required = true, value = "")
   @NotNull
 
-
+@Size(max=250) 
   public String getCategoryImageDownloadUrl() {
     return categoryImageDownloadUrl;
   }

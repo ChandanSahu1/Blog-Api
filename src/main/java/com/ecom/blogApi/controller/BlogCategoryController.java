@@ -81,7 +81,7 @@ public class BlogCategoryController {
 	ResponseEntity<Object> putBlogCategoryImage(@PathVariable("blogcategoryid") int id,
 			@RequestParam("categoryName") String categoryName, @RequestParam("seoTitle") String seoTitle,
 			@RequestParam("seoMetaDesc") String seoMetaDesc, @RequestParam("status") String status,
-			@RequestParam("imgData") MultipartFile categoryImg) {
+			@RequestParam(value="imgData",required=false) MultipartFile categoryImg) {
 		BlogCategory blgCategory = null;
 		try {
 

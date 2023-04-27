@@ -22,7 +22,7 @@ import com.ecom.blogApi.api.model.BlogCategory;
 import com.ecom.blogApi.service.BlogService;
 
 @RestController
-@RequestMapping(path="/api/v1")
+@RequestMapping(path = "/api/v1")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class BlogController {
 
@@ -76,20 +76,26 @@ public class BlogController {
 
 	@CrossOrigin
 	@PutMapping(value = "/blog/{blogId}")
-	ResponseEntity<Object> updateBlogAndImage(@PathVariable("blogId") int blogId,
-			@RequestParam("categoryId") int categoryId, @RequestParam("authorName") String authorName,
-			@RequestParam("blogTitle") String blogTitle, @RequestParam("description") String description,
-			@RequestParam("seoTitle") String seoTitle, @RequestParam("seoMetaDescription") String seoMetaDescription,
-			@RequestParam("status") String status, @RequestParam("blogImage") MultipartFile imageData,
-			@RequestParam("blogBanner") MultipartFile bannerData,
-			@RequestParam("mobileBanner") MultipartFile mobileBanner) {
+	ResponseEntity<Object> updateBlog(@PathVariable("blogId") int blogId, @RequestParam("categoryId") int categoryId,
+			@RequestParam("authorName") String authorName, @RequestParam("blogTitle") String blogTitle,
+			@RequestParam("description") String description, @RequestParam("seoTitle") String seoTitle,
+			@RequestParam("seoMetaDescription") String seoMetaDescription, @RequestParam("status") String status,
+			@RequestParam(value ="blogImage",required=false) MultipartFile imageData, @RequestParam(value="blogBanner" , required=false) MultipartFile bannerData,
+			@RequestParam(value="mobileBanner", required=false) MultipartFile mobileBanner) {
+		
+		System.out.println("print");
+		System.out.println("image ====== "+imageData);
+		System.out.println("banner  ====== "+bannerData);
+		System.out.println("test banner  ====== "+mobileBanner);
 
 		try {
-			Blog blogResponse = blogService.updateBlog(blogId, categoryId, authorName, blogTitle, description, seoTitle,
+			Blog blogResponse = blogService.update(blogId, categoryId, authorName, blogTitle, description, seoTitle,
 					seoMetaDescription, status, imageData, bannerData, mobileBanner);
 
 			return new ResponseEntity<>(blogResponse, HttpStatus.OK);
 		} catch (Exception ex) {
+			
+			System.out.println("catchblock= "+ex.getMessage());
 
 			return ResponseHandler.generateResponseForBlog(ex.getMessage(), HttpStatus.MULTI_STATUS, null);
 		}

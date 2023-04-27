@@ -407,7 +407,7 @@ components:
           maxLength: 200
         status:
           type: string
-          maxLength: 6
+          maxLength: 8
         categoryImage:
           $ref: '#/components/schemas/BlogCategoryImage'
     BlogCategoryImage:
@@ -420,8 +420,10 @@ components:
           type: integer
         categoryImageName:
           type : string
+          maxLength: 250
         categoryImageDownloadUrl:
           type : string
+          maxLength: 250
     Blog:
       type: object
       required:
@@ -462,10 +464,13 @@ components:
           type: integer
         blogImageName:
           type: string
+          maxLength: 120
         imageDownloadUrl:
           type: string
+          maxLength: 250
         imageType:
           type: string
+          maxLength: 12
     BlogSubImage:
       $ref: '#/components/schemas/BlogImages'
     BlogBannerImage:

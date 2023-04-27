@@ -13,7 +13,7 @@ import javax.validation.constraints.*;
 /**
  * BlogCategory
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2023-04-26T18:03:08.023083400+05:30[Asia/Calcutta]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2023-04-27T18:22:59.519951200+05:30[Asia/Calcutta]")
 
 public class BlogCategory   {
   @JsonProperty("blogcategoryId")
@@ -129,7 +129,7 @@ public class BlogCategory   {
   */
   @ApiModelProperty(value = "")
 
-@Size(max=6) 
+@Size(max=8) 
   public String getStatus() {
     return status;
   }
