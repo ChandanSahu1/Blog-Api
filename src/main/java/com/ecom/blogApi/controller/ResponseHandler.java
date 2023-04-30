@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import com.ecom.blogApi.api.model.Blog;
 import com.ecom.blogApi.api.model.BlogCategory;
 import com.ecom.blogApi.api.model.BlogCategoryImage;
+import com.ecom.blogApi.api.model.JwtResponse;
 import com.ecom.blogApi.api.model.UserLoginResponse;
 import com.ecom.blogApi.api.model.UserRegistration;
 
@@ -86,6 +87,25 @@ public class ResponseHandler {
 
 	}
 	
+	public static ResponseEntity<Object> generateResponseForJwt(String message, HttpStatus status,
+			Object responseObj) {
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		if (responseObj != null && (responseObj instanceof JwtResponse)) {
+			map.put("message", message);
+			map.put("status", status.value());
+			map.put("token", ((JwtResponse) responseObj).getToken());
+			return new ResponseEntity<Object>(map, status);
+		} else {
+			map.put("message", message);
+			map.put("status", status.value());
+			map.put("token", null);
+			return new ResponseEntity<Object>(map, status);
+		}
+		
+	}
+	
 	public static ResponseEntity<Object> generateResponseForLogin(String message, Object responseObj) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		
@@ -102,6 +122,8 @@ public class ResponseHandler {
 			map.put("response", false);
 			return new ResponseEntity<Object>(map, HttpStatus.OK);
 		}
+		
+		
 		
 	}
 

@@ -528,3 +528,22 @@ components:
         response:
           type: boolean
           
+    JwtRequest:  
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          maxLength: 120
+        password:
+          type: string
+          
+    JwtResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          
+        

@@ -103,3 +103,17 @@ modified_by INT DEFAULT NULL,
 created_date timestamp NOT NULL DEFAULT  current_timestamp(),
 modified_date timestamp NULL DEFAULT NULL ON Update current_timestamp()
 );
+
+create table api_credentials(
+user_id int not null primary key auto_increment,
+username varchar(120) not null,
+password varchar(250) not null,
+status varchar(8) not null,
+created_by int DEFAULT NULL,
+modified_by int DEFAULT NULL,
+created_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+modified_date timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+);
+
+insert into api_credentials (username , password) values("user","password");
+

@@ -10,39 +10,39 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * UserLogin
+ * JwtRequest
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2023-04-30T23:01:36.740921300+05:30[Asia/Calcutta]")
 
-public class UserLogin   {
-  @JsonProperty("email")
-  private String email;
+public class JwtRequest   {
+  @JsonProperty("username")
+  private String username;
 
   @JsonProperty("password")
   private String password;
 
-  public UserLogin email(String email) {
-    this.email = email;
+  public JwtRequest username(String username) {
+    this.username = username;
     return this;
   }
 
   /**
-   * Get email
-   * @return email
+   * Get username
+   * @return username
   */
   @ApiModelProperty(required = true, value = "")
   @NotNull
 
-@Size(max=250) 
-  public String getEmail() {
-    return email;
+@Size(max=120) 
+  public String getUsername() {
+    return username;
   }
 
-  public void setEmail(String email) {
-    this.email = email;
+  public void setUsername(String username) {
+    this.username = username;
   }
 
-  public UserLogin password(String password) {
+  public JwtRequest password(String password) {
     this.password = password;
     return this;
   }
@@ -54,7 +54,7 @@ public class UserLogin   {
   @ApiModelProperty(required = true, value = "")
   @NotNull
 
-@Size(max=250) 
+
   public String getPassword() {
     return password;
   }
@@ -72,22 +72,22 @@ public class UserLogin   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    UserLogin userLogin = (UserLogin) o;
-    return Objects.equals(this.email, userLogin.email) &&
-        Objects.equals(this.password, userLogin.password);
+    JwtRequest jwtRequest = (JwtRequest) o;
+    return Objects.equals(this.username, jwtRequest.username) &&
+        Objects.equals(this.password, jwtRequest.password);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(email, password);
+    return Objects.hash(username, password);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class UserLogin {\n");
+    sb.append("class JwtRequest {\n");
     
-    sb.append("    email: ").append(toIndentedString(email)).append("\n");
+    sb.append("    username: ").append(toIndentedString(username)).append("\n");
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
     sb.append("}");
     return sb.toString();
